@@ -1,0 +1,65 @@
+[worldserver]
+
+########################################
+# mod-temucraft-shop
+########################################
+#
+#    Temucraft.Shop.Enable
+#        Description: Temucraft Tokens, the curator and the form glyphs.
+#        Default:     1
+
+Temucraft.Shop.Enable = 1
+
+#
+#    Temucraft.Shop.TokenItem
+#        Description: Item used as the currency. It must match the ItemExtendedCost and CurrencyTypes rows.
+#        Default:     608000
+
+Temucraft.Shop.TokenItem = 608000
+
+#
+#    Temucraft.Shop.Tokens.PerLevel
+#    Temucraft.Shop.Tokens.Per10Levels
+#        Description: Tokens for each new level, and extra tokens at every 10th level. A level is only paid
+#                     once per character, even after a level reset.
+#        Default:     1, 5
+
+Temucraft.Shop.Tokens.PerLevel = 1
+Temucraft.Shop.Tokens.Per10Levels = 5
+
+#
+#    Temucraft.Shop.Tokens.DungeonBoss
+#    Temucraft.Shop.Tokens.HeroicBoss
+#    Temucraft.Shop.Tokens.RaidBoss
+#        Description: Tokens for the first kill of each boss, per character and difficulty. Every group member
+#                     in the instance gets them. 0 turns a source off.
+#        Default:     2, 3, 10
+
+Temucraft.Shop.Tokens.DungeonBoss = 2
+Temucraft.Shop.Tokens.HeroicBoss = 3
+Temucraft.Shop.Tokens.RaidBoss = 10
+
+#
+#    Temucraft.Shop.Tokens.AchievementPointsPerToken
+#        Description: One token per this many achievement points earned (0 = off).
+#        Default:     5
+
+Temucraft.Shop.Tokens.AchievementPointsPerToken = 5
+
+#
+#    Temucraft.Shop.GoldPerToken
+#        Description: Gold the curator asks for one token (0 = tokens can't be bought with gold).
+#        Default:     10
+
+Temucraft.Shop.GoldPerToken = 10
+
+#
+#    Temucraft.Shop.Summon.Enable
+#    Temucraft.Shop.Summon.Cooldown
+#    Temucraft.Shop.Summon.Duration
+#        Description: .shop summon calls a curator for Duration seconds, once every Cooldown seconds.
+#        Default:     1, 600, 180
+
+Temucraft.Shop.Summon.Enable = 1
+Temucraft.Shop.Summon.Cooldown = 600
+Temucraft.Shop.Summon.Duration = 180
