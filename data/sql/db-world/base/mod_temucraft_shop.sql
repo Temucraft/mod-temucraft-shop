@@ -5,7 +5,7 @@ SET @TOKEN := 608000; SET @CURATOR := 608000; SET @VENDOR := 608001; SET @GUID :
 -- the currency (shows in the currency tab; CurrencyTypes row 343 is in mod_temucraft_shop_dbc.sql)
 DELETE FROM `item_template` WHERE `entry` = @TOKEN;
 INSERT INTO `item_template` (`entry`, `class`, `subclass`, `SoundOverrideSubclass`, `name`, `displayid`, `Quality`, `Flags`, `BuyCount`, `BuyPrice`, `SellPrice`, `InventoryType`, `ItemLevel`, `maxcount`, `stackable`, `bonding`, `description`, `Material`, `BagFamily`, `VerifiedBuild`) VALUES
-(@TOKEN, 10, 0, -1, 'Temucraft Token', 32746, 4, 0, 1, 0, 0, 0, 1, 0, 2147483647, 1, 'Earned by levelling, first boss kills and achievements. Spent with the Temucraft Curator.', -1, 8192, 0);
+(@TOKEN, 10, 0, -1, 'Temucraft Token', 119564, 4, 0, 1, 0, 0, 0, 1, 0, 2147483647, 1, 'Earned by levelling, first boss kills and achievements. Spent with the Temucraft Curator.', -1, 8192, 0);
 
 -- the curator (gossip menu leads to the category lists) and one hidden vendor entry per category
 DELETE FROM `creature_template` WHERE `entry` BETWEEN @CURATOR AND @VENDOR+7;

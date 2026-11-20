@@ -1,6 +1,6 @@
 # mod-temucraft-shop
 
-The Temucraft Token is a currency (it shows in the currency tab), spent with the **Temucraft Curator**.
+The Temucraft Token is a currency (it shows in the currency tab), spent with the **Temucraft Curator**. Its icon is the Siamese cat (`INV_Pet_Cats_SiameseCat`, display 119564, a stock look).
 
 ## Earning tokens
 
