@@ -14,7 +14,9 @@ SELECT @VENDOR+8, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, 0 F
 UNION ALL SELECT @VENDOR+9, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, 0 FROM `creature_template_model` WHERE `CreatureID` = @VENDOR
 UNION ALL SELECT @VENDOR+10, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, 0 FROM `creature_template_model` WHERE `CreatureID` = @VENDOR;
 
-DELETE FROM `npc_vendor` WHERE `entry` = @VENDOR+8 OR (`entry` IN (@VENDOR+4, @VENDOR+5) AND `slot` >= 100);
+-- Companions 109-113 and Illusions 100-102 are mod-temucraft-lostlands items (610200-610207, made on models we
+-- already have): companions 75 tokens, illusion toys 80.
+DELETE FROM `npc_vendor` WHERE `entry` = @VENDOR+8 OR (`entry` IN (@VENDOR+4, @VENDOR+5, @VENDOR+7) AND `slot` >= 100);
 INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
 (@VENDOR+4, 100, 38576, 0, 0, 3209, 0),
 (@VENDOR+4, 101, 37719, 0, 0, 3209, 0),
@@ -29,6 +31,14 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR+5, 106, 39286, 0, 0, 3202, 0),
 (@VENDOR+5, 107, 44819, 0, 0, 3202, 0),
 (@VENDOR+5, 108, 49343, 0, 0, 3208, 0),
+(@VENDOR+5, 109, 610200, 0, 0, 3202, 0),
+(@VENDOR+5, 110, 610201, 0, 0, 3202, 0),
+(@VENDOR+5, 111, 610202, 0, 0, 3202, 0),
+(@VENDOR+5, 112, 610203, 0, 0, 3202, 0),
+(@VENDOR+5, 113, 610204, 0, 0, 3202, 0),
+(@VENDOR+7, 100, 610205, 0, 0, 3203, 0),
+(@VENDOR+7, 101, 610206, 0, 0, 3203, 0),
+(@VENDOR+7, 102, 610207, 0, 0, 3203, 0),
 (@VENDOR+8, 100, 32566, 0, 0, 3201, 0),
 (@VENDOR+8, 101, 34493, 0, 0, 3202, 0),
 (@VENDOR+8, 102, 49287, 0, 0, 3202, 0),
@@ -53,7 +63,8 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR+8, 121, 21540, 0, 0, 3201, 0),
 (@VENDOR+8, 122, 37254, 0, 0, 3202, 0),
 (@VENDOR+8, 123, 44482, 0, 0, 3202, 0),
-(@VENDOR+8, 124, 35227, 0, 0, 3202, 0);
+(@VENDOR+8, 124, 35227, 0, 0, 3202, 0),
+(@VENDOR+8, 125, 40110, 0, 0, 3202, 0);
 
 -- Saddlemaster's Handbooks: a riding rank for a quarter of the trainer's gold price, once another character of the
 -- account knows it (checked when used; the book can be sold back for what it cost). Sold by every riding trainer.

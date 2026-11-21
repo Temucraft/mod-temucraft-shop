@@ -24,12 +24,12 @@ One stands beside the innkeeper of every capital (Stormwind, Orgrimmar, Ironforg
 | Gameplay | 11 |
 | Glyphs | 9 |
 | Mounts | 63 |
-| Companions | 45 |
+| Companions | 50 |
 | Fashion | 51 |
-| Illusions | 24 |
-| Toys | 25 |
+| Illusions | 27 |
+| Toys | 26 |
 | Auras | from mod-temucraft-auras |
-| Helpers | Courier's Bell, Folding Mirror, Almanac, Lantern (mod-temucraft-courier), Banker's Writ, Guild Vault Charter |
+| Helpers | Courier's Bell, Folding Mirror, Almanac, Lantern (mod-temucraft-courier), Banker's Writ, Guild Vault Charter, Skyreader's Atlas, Hearthbound and Fel Waygate, Wayfarer's Beacon (mod-temucraft-travel) |
 
 ## Bringing back a deleted character
 
