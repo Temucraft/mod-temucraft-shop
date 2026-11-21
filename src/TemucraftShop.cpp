@@ -481,10 +481,10 @@ namespace TemucraftShop
             uint32 guid = player->GetGUID().GetCounter();
             sMaxLevel[guid] = player->GetLevel();
             sBosses[guid].clear();
-            if (QueryResult r = CharacterDatabase.Query("SELECT `MaxLevel` FROM `mod_temucraft_shop_progress` WHERE `guid` = {}", guid))
-                sMaxLevel[guid] = std::max<uint32>(r->Fetch()[0].Get<uint32>(), player->GetLevel());
+            if (QueryResult r = CharacterDatabase.Query("SELECT `value` FROM `mod_temucraft_character_setting` WHERE `guid` = {} AND `setting` = 'shopmaxlevel'", guid))
+                sMaxLevel[guid] = std::max<uint32>(uint32(r->Fetch()[0].Get<int32>()), player->GetLevel());
             else
-                CharacterDatabase.Execute("INSERT IGNORE INTO `mod_temucraft_shop_progress` (`guid`, `MaxLevel`) VALUES ({}, {})", guid, player->GetLevel());
+                CharacterDatabase.Execute("INSERT IGNORE INTO `mod_temucraft_character_setting` (`guid`, `setting`, `value`) VALUES ({}, 'shopmaxlevel', {})", guid, player->GetLevel());
             if (QueryResult r = CharacterDatabase.Query("SELECT `entry` FROM `mod_temucraft_shop_boss` WHERE `guid` = {}", guid))
                 do sBosses[guid].insert(r->Fetch()[0].Get<uint32>()); while (r->NextRow());
         }
@@ -498,7 +498,7 @@ namespace TemucraftShop
 
         void OnPlayerDelete(ObjectGuid guid, uint32 /*accountId*/) override
         {
-            CharacterDatabase.Execute("DELETE FROM `mod_temucraft_shop_progress` WHERE `guid` = {}", guid.GetCounter());
+            CharacterDatabase.Execute("DELETE FROM `mod_temucraft_character_setting` WHERE `guid` = {} AND `setting` = 'shopmaxlevel'", guid.GetCounter());
             CharacterDatabase.Execute("DELETE FROM `mod_temucraft_shop_boss` WHERE `guid` = {}", guid.GetCounter());
         }
 
@@ -515,7 +515,7 @@ namespace TemucraftShop
             for (uint32 l = best + 1; l <= level; ++l)
                 tokens += cfg.perLevel + (l % 10 == 0 ? cfg.per10Levels : 0);
             best = level;
-            CharacterDatabase.Execute("REPLACE INTO `mod_temucraft_shop_progress` (`guid`, `MaxLevel`) VALUES ({}, {})", guid, level);
+            CharacterDatabase.Execute("REPLACE INTO `mod_temucraft_character_setting` (`guid`, `setting`, `value`) VALUES ({}, 'shopmaxlevel', {})", guid, level);
             Give(player, tokens, "level up");
         }
 
