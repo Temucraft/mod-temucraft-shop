@@ -29,6 +29,12 @@ One stands beside the innkeeper of every capital (Stormwind, Orgrimmar, Ironforg
 | Illusions | 24 |
 | Toys | 25 |
 
+## Saddlemaster's Handbooks
+
+Every riding trainer also sells Saddlemaster's Handbooks (Journeyman, Expert, Artisan, Cold Weather) for a quarter of
+the trainer's gold price. A book teaches its rank only if another character of the same account already knows it (and
+the usual level and previous rank); otherwise it says so and can be sold back for what it cost. Items 610100-610103.
+
 ## Service tokens
 
 Rename, appearance change, race change (to the other faction it becomes a faction change), pet rename (call the pet first) and guild rename (`.shop guildname <name>`, guild master only).

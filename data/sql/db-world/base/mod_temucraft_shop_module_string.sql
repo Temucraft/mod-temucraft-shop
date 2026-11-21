@@ -38,4 +38,8 @@ INSERT INTO `module_string` (`module`, `id`, `string`) VALUES
 ('mod-temucraft-shop', 35, 'Sell 10 tokens for gold.'),
 ('mod-temucraft-shop', 36, 'Sell 10 Temucraft Tokens for gold?'),
 ('mod-temucraft-shop', 37, '|cff66ccffTemucraft:|r sold {} token(s) for {} gold.'),
-('mod-temucraft-shop', 38, 'Took {} token(s) from {} ({} left).');
+('mod-temucraft-shop', 38, 'Took {} token(s) from {} ({} left).'),
+('mod-temucraft-shop', 39, '|cff66ccffTemucraft:|r you already know this.'),
+('mod-temucraft-shop', 40, '|cff66ccffTemucraft:|r you need level {} and the riding rank before this one.'),
+('mod-temucraft-shop', 41, '|cff66ccffTemucraft:|r another character of your account must know this first. Sell the book back and learn it from the trainer.'),
+('mod-temucraft-shop', 42, '|cff66ccffTemucraft:|r learned.');

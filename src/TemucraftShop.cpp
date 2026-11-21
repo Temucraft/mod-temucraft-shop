@@ -592,6 +592,46 @@ namespace TemucraftShop
         }
     };
 
+    // Saddlemaster's Handbooks: a riding rank for a quarter of the trainer's price, once another character of the
+    // same account knows it. Sold by riding trainers for gold (data in mod_temucraft_shop_more.sql).
+    struct Handbook { uint32 spell; uint32 previous; uint8 level; };
+    std::unordered_map<uint32, Handbook> const HANDBOOKS =
+    {
+        { 610100, { 33391, 33388, 40 } },   // Journeyman Riding
+        { 610101, { 34090, 33391, 60 } },   // Expert Riding
+        { 610102, { 34091, 34090, 70 } },   // Artisan Riding
+        { 610103, { 54197, 34090, 77 } },   // Cold Weather Flying
+    };
+
+    class item_temucraft_handbook : public ItemScript
+    {
+    public:
+        item_temucraft_handbook() : ItemScript("item_temucraft_handbook") { }
+
+        bool OnUse(Player* player, Item* item, SpellCastTargets const& /*targets*/) override
+        {
+            auto it = HANDBOOKS.find(item->GetEntry());
+            if (it == HANDBOOKS.end())
+                return false;
+            Handbook const& h = it->second;
+            ChatHandler handler(player->GetSession());
+            if (player->HasSpell(h.spell))
+                handler.SendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 39, "|cff66ccffTemucraft:|r you already know this."));
+            else if (player->GetLevel() < h.level || !player->HasSpell(h.previous))
+                handler.PSendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 40, "|cff66ccffTemucraft:|r you need level {} and the riding rank before this one."), h.level);
+            else if (!CharacterDatabase.Query("SELECT 1 FROM character_spell s JOIN characters c ON c.guid = s.guid WHERE c.account = {} AND c.guid <> {} AND s.spell = {} LIMIT 1",
+                         player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), h.spell))
+                handler.SendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 41, "|cff66ccffTemucraft:|r another character of your account must know this first. Sell the book back and learn it from the trainer."));
+            else
+            {
+                player->learnSpell(h.spell);
+                player->DestroyItemCount(item->GetEntry(), 1, true);
+                handler.SendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 42, "|cff66ccffTemucraft:|r learned."));
+            }
+            return true;
+        }
+    };
+
     class TemucraftShopWorld : public WorldScript
     {
     public:
@@ -607,6 +647,7 @@ void AddTemucraftShopScripts()
     new TemucraftShop::TemucraftShopWorld();
     new TemucraftShop::npc_temucraft_shop_curator();
     new TemucraftShop::item_temucraft_shop_service();
+    new TemucraftShop::item_temucraft_handbook();
     new TemucraftShop::TemucraftShopPlayer();
     new TemucraftShop::TemucraftShopForms();
     new TemucraftShop::TemucraftShopCommands();

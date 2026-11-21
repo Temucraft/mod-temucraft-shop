@@ -50,3 +50,28 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR+8, 122, 37254, 0, 0, 3202, 0),
 (@VENDOR+8, 123, 44482, 0, 0, 3202, 0),
 (@VENDOR+8, 124, 35227, 0, 0, 3202, 0);
+
+-- Saddlemaster's Handbooks: a riding rank for a quarter of the trainer's gold price, once another character of the
+-- account knows it (checked when used; the book can be sold back for what it cost). Sold by every riding trainer.
+SET @BOOK := 610100;
+DELETE FROM `item_template` WHERE `entry` BETWEEN @BOOK AND @BOOK+3;
+INSERT INTO `item_template` (`entry`, `class`, `subclass`, `SoundOverrideSubclass`, `name`, `displayid`, `Quality`, `Flags`, `BuyCount`, `BuyPrice`, `SellPrice`, `InventoryType`, `ItemLevel`, `RequiredLevel`, `maxcount`, `stackable`, `spellid_1`, `spelltrigger_1`, `spellcharges_1`, `bonding`, `description`, `Material`, `ScriptName`) VALUES
+(@BOOK+0, 0, 8, -1, 'Saddlemaster\'s Handbook: Journeyman', 13108, 2, 0, 1, 125000, 125000, 0, 40, 40, 1, 1, 18282, 0, -1, 1, 'Teaches Journeyman Riding if another character of your account knows it.', 4, 'item_temucraft_handbook'),
+(@BOOK+1, 0, 8, -1, 'Saddlemaster\'s Handbook: Expert', 13108, 3, 0, 1, 625000, 625000, 0, 60, 60, 1, 1, 18282, 0, -1, 1, 'Teaches Expert Riding if another character of your account knows it.', 4, 'item_temucraft_handbook'),
+(@BOOK+2, 0, 8, -1, 'Saddlemaster\'s Handbook: Artisan', 37425, 4, 0, 1, 12500000, 12500000, 0, 70, 70, 1, 1, 18282, 0, -1, 1, 'Teaches Artisan Riding if another character of your account knows it.', 4, 'item_temucraft_handbook'),
+(@BOOK+3, 0, 8, -1, 'Saddlemaster\'s Handbook: Cold Weather', 37425, 3, 0, 1, 2500000, 2500000, 0, 77, 77, 1, 1, 18282, 0, -1, 1, 'Teaches Cold Weather Flying if another character of your account knows it.', 4, 'item_temucraft_handbook');
+
+-- riding trainers become vendors too, and sell the books they teach the rank of
+DROP TEMPORARY TABLE IF EXISTS `tmp_temucraft_riding`;
+CREATE TEMPORARY TABLE `tmp_temucraft_riding` (`entry` INT UNSIGNED PRIMARY KEY, `artisan` TINYINT, `cold` TINYINT);
+INSERT IGNORE INTO `tmp_temucraft_riding` (`entry`, `artisan`, `cold`)
+SELECT d.`CreatureId`, MAX(s.`SpellId` = 34091), MAX(s.`SpellId` = 54197) FROM `creature_default_trainer` d
+JOIN `trainer_spell` s ON s.`TrainerId` = d.`TrainerId` WHERE s.`SpellId` IN (33391, 34090, 34091, 54197) GROUP BY d.`CreatureId`;
+UPDATE `creature_template` SET `npcflag` = `npcflag` | 128 WHERE `entry` IN (SELECT `entry` FROM `tmp_temucraft_riding`);
+DELETE FROM `npc_vendor` WHERE `item` BETWEEN @BOOK AND @BOOK+3;
+INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`)
+SELECT `entry`, 0, @BOOK+0, 0, 0, 0, 0 FROM `tmp_temucraft_riding`
+UNION ALL SELECT `entry`, 1, @BOOK+1, 0, 0, 0, 0 FROM `tmp_temucraft_riding`
+UNION ALL SELECT `entry`, 2, @BOOK+2, 0, 0, 0, 0 FROM `tmp_temucraft_riding` WHERE `artisan` = 1
+UNION ALL SELECT `entry`, 3, @BOOK+3, 0, 0, 0, 0 FROM `tmp_temucraft_riding` WHERE `cold` = 1;
+DROP TEMPORARY TABLE `tmp_temucraft_riding`;
