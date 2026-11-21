@@ -14,7 +14,7 @@ SELECT @VENDOR+8, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, 0 F
 UNION ALL SELECT @VENDOR+9, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, 0 FROM `creature_template_model` WHERE `CreatureID` = @VENDOR
 UNION ALL SELECT @VENDOR+10, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, 0 FROM `creature_template_model` WHERE `CreatureID` = @VENDOR;
 
--- Companions 109-113 and Illusions 100-102 are mod-temucraft-lostlands items (610200-610207, made on models we
+-- Companions 109-114 and Illusions 100-102 are mod-temucraft-lostlands items (610200-610208, made on models we
 -- already have): companions 75 tokens, illusion toys 80.
 DELETE FROM `npc_vendor` WHERE `entry` = @VENDOR+8 OR (`entry` IN (@VENDOR+4, @VENDOR+5, @VENDOR+7) AND `slot` >= 100);
 INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
@@ -36,6 +36,7 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR+5, 111, 610202, 0, 0, 3202, 0),
 (@VENDOR+5, 112, 610203, 0, 0, 3202, 0),
 (@VENDOR+5, 113, 610204, 0, 0, 3202, 0),
+(@VENDOR+5, 114, 610208, 0, 0, 3202, 0),
 (@VENDOR+7, 100, 610205, 0, 0, 3203, 0),
 (@VENDOR+7, 101, 610206, 0, 0, 3203, 0),
 (@VENDOR+7, 102, 610207, 0, 0, 3203, 0),
