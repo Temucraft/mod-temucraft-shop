@@ -63,6 +63,7 @@ namespace TemucraftShop
         uint32 raidBoss = 10;
         uint32 achievementPointsPerToken = 5;
         uint32 goldPerToken = 10;
+        uint32 goldPerTokenSold = 0;   // gold a player gets for one token sold back (0 = selling is off)
         bool summon = true;
         uint32 summonCooldown = 600;
         uint32 summonDuration = 180;
@@ -77,7 +78,8 @@ namespace TemucraftShop
     std::unordered_map<uint32, std::unordered_set<uint32>> sBosses;   // guid -> boss entries already rewarded
     std::unordered_map<uint32, uint32> sLastSummon;               // guid -> game time
 
-    char const* CategoryNames[8] = { "Miscellaneous", "Skins", "Gameplay", "Glyphs", "Mounts", "Companions", "Fashion", "Illusions" };
+    constexpr uint8 CATEGORY_COUNT = 9;
+    char const* CategoryNames[CATEGORY_COUNT] = { "Miscellaneous", "Skins", "Gameplay", "Glyphs", "Mounts", "Companions", "Fashion", "Illusions", "Toys" };
 
     void LoadConfig()
     {
@@ -90,6 +92,7 @@ namespace TemucraftShop
         cfg.raidBoss = sConfigMgr->GetOption<uint32>("Temucraft.Shop.Tokens.RaidBoss", 10);
         cfg.achievementPointsPerToken = sConfigMgr->GetOption<uint32>("Temucraft.Shop.Tokens.AchievementPointsPerToken", 5);
         cfg.goldPerToken = sConfigMgr->GetOption<uint32>("Temucraft.Shop.GoldPerToken", 10);
+        cfg.goldPerTokenSold = sConfigMgr->GetOption<uint32>("Temucraft.Shop.GoldPerTokenSold", 0);
         cfg.summon = sConfigMgr->GetOption<bool>("Temucraft.Shop.Summon.Enable", true);
         cfg.summonCooldown = sConfigMgr->GetOption<uint32>("Temucraft.Shop.Summon.Cooldown", 600);
         cfg.summonDuration = sConfigMgr->GetOption<uint32>("Temucraft.Shop.Summon.Duration", 180);
@@ -172,18 +175,28 @@ namespace TemucraftShop
         ACTION_BUY_1 = 200,
         ACTION_BUY_10 = 201,
         ACTION_BALANCE = 202,
+        ACTION_SELL_1 = 203,
+        ACTION_SELL_10 = 204,
     };
 
     void ShowMenu(Player* player, Creature* creature)
     {
         ClearGossipMenuFor(player);
-        for (uint8 i = 0; i < 8; ++i)
+        for (uint8 i = 0; i < CATEGORY_COUNT; ++i)
             AddGossipItemFor(player, GOSSIP_ICON_VENDOR, std::string(TemucraftModuleText("mod-temucraft-shop", player, 2, "Browse: ")) + CategoryNames[i], GOSSIP_SENDER_MAIN, ACTION_CATEGORY + i);
         if (cfg.goldPerToken)
         {
             uint32 copper = cfg.goldPerToken * GOLD;
             AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, TemucraftModuleText("mod-temucraft-shop", player, 3, "Buy 1 token for gold."), GOSSIP_SENDER_MAIN, ACTION_BUY_1, TemucraftModuleText("mod-temucraft-shop", player, 4, "Trade gold for 1 Temucraft Token?"), copper, false);
             AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, TemucraftModuleText("mod-temucraft-shop", player, 5, "Buy 10 tokens for gold."), GOSSIP_SENDER_MAIN, ACTION_BUY_10, TemucraftModuleText("mod-temucraft-shop", player, 6, "Trade gold for 10 Temucraft Tokens?"), copper * 10, false);
+        }
+        if (cfg.goldPerTokenSold)
+        {
+            uint32 have = Balance(player);
+            if (have >= 1)
+                AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, TemucraftModuleText("mod-temucraft-shop", player, 33, "Sell 1 token for gold."), GOSSIP_SENDER_MAIN, ACTION_SELL_1, TemucraftModuleText("mod-temucraft-shop", player, 34, "Sell 1 Temucraft Token for gold?"), 0, false);
+            if (have >= 10)
+                AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, TemucraftModuleText("mod-temucraft-shop", player, 35, "Sell 10 tokens for gold."), GOSSIP_SENDER_MAIN, ACTION_SELL_10, TemucraftModuleText("mod-temucraft-shop", player, 36, "Sell 10 Temucraft Tokens for gold?"), 0, false);
         }
         AddGossipItemFor(player, GOSSIP_ICON_CHAT, TemucraftModuleText("mod-temucraft-shop", player, 7, "How do I earn tokens?"), GOSSIP_SENDER_MAIN, ACTION_BALANCE);
         SendGossipMenuFor(player, CURATOR_TEXT, creature->GetGUID());
@@ -204,7 +217,7 @@ namespace TemucraftShop
 
         bool OnGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
         {
-            if (action >= ACTION_CATEGORY && action < ACTION_CATEGORY + 8)
+            if (action >= ACTION_CATEGORY && action < ACTION_CATEGORY + CATEGORY_COUNT)
             {
                 CloseGossipMenuFor(player);
                 player->GetSession()->SendListInventory(creature->GetGUID(), VENDOR_FIRST + (action - ACTION_CATEGORY));
@@ -222,6 +235,16 @@ namespace TemucraftShop
                 {
                     player->ModifyMoney(-int32(copper));
                     Give(player, count, "bought with gold");
+                }
+            }
+            else if (action == ACTION_SELL_1 || action == ACTION_SELL_10)
+            {
+                uint32 count = action == ACTION_SELL_1 ? 1 : 10;
+                uint64 copper = uint64(cfg.goldPerTokenSold) * GOLD * count;
+                if (cfg.goldPerTokenSold && Balance(player) >= count && player->ModifyMoney(int32(copper), false))
+                {
+                    player->DestroyItemCount(cfg.token, count, true);
+                    handler.PSendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 37, "|cff66ccffTemucraft:|r sold {} token(s) for {} gold."), count, cfg.goldPerTokenSold * count);
                 }
             }
             else if (action == ACTION_BALANCE)
@@ -449,6 +472,7 @@ namespace TemucraftShop
                 { "summon",    HandleSummon,    SEC_PLAYER,     Console::No },
                 { "guildname", HandleGuildName, SEC_PLAYER,     Console::No },
                 { "add",       HandleAdd,       101201 /* SEC_GAMEMASTER -> RBAC */, Console::Yes },
+                { "remove",    HandleRemove,    101201 /* SEC_GAMEMASTER -> RBAC */, Console::Yes },
                 { "reload",    HandleReload,    101202 /* SEC_ADMINISTRATOR -> RBAC */, Console::Yes },
             };
             static ChatCommandTable root = { { "shop", shop } };
@@ -539,6 +563,23 @@ namespace TemucraftShop
             }
             Give(target->GetConnectedPlayer(), count, "given by a game master");
             handler->PSendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 31, "Gave {} token(s) to {}."), count, target->GetName());
+            return true;
+        }
+
+        static bool HandleRemove(ChatHandler* handler, uint32 count, Optional<PlayerIdentifier> target)
+        {
+            if (!target)
+                target = PlayerIdentifier::FromTargetOrSelf(handler);
+            if (!target || !target->IsConnected())
+            {
+                handler->SendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 30, "Player not found or not online."));
+                return true;
+            }
+            Player* player = target->GetConnectedPlayer();
+            uint32 taken = std::min(count, Balance(player));
+            if (taken)
+                player->DestroyItemCount(cfg.token, taken, true);
+            handler->PSendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 38, "Took {} token(s) from {} ({} left)."), taken, target->GetName(), Balance(player));
             return true;
         }
 

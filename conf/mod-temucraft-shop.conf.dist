@@ -54,6 +54,14 @@ Temucraft.Shop.Tokens.AchievementPointsPerToken = 5
 Temucraft.Shop.GoldPerToken = 10
 
 #
+#    Temucraft.Shop.GoldPerTokenSold
+#        Description: Gold a player gets for each token sold back to the curator (0 = players can't sell tokens).
+#                     Keep it at or below GoldPerToken, or gold can be made by buying and selling.
+#        Default:     0
+
+Temucraft.Shop.GoldPerTokenSold = 0
+
+#
 #    Temucraft.Shop.Summon.Enable
 #    Temucraft.Shop.Summon.Cooldown
 #    Temucraft.Shop.Summon.Duration

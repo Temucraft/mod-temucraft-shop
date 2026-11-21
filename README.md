@@ -10,7 +10,8 @@ All amounts are in `conf/mod-temucraft-shop.conf.dist`; 0 turns a source off.
 - **Bosses:** the first kill of each dungeon boss (2), heroic boss (3) and raid boss (10), per character and difficulty. Every group member in the instance gets them.
 - **Achievements:** 1 per 5 achievement points.
 - **Gold:** the curator sells tokens for 10 gold each (`GoldPerToken`, 0 = off).
-- **Game masters:** `.shop add <count> [player]`.
+- **Game masters:** `.shop add <count> [player]` and `.shop remove <count> [player]`.
+- **Selling back:** with `GoldPerTokenSold` above 0 the curator also buys tokens back for gold (off by default).
 
 ## The curator
 
@@ -22,10 +23,11 @@ One stands beside the innkeeper of every capital (Stormwind, Orgrimmar, Ironforg
 | Skins | 39 |
 | Gameplay | 11 |
 | Glyphs | 9 |
-| Mounts | 59 |
-| Companions | 36 |
+| Mounts | 63 |
+| Companions | 45 |
 | Fashion | 51 |
 | Illusions | 24 |
+| Toys | 25 |
 
 ## Service tokens
 
@@ -38,7 +40,7 @@ While a glyph is known, druid forms and Ghost Wolf show another model (Frostsabe
 ## Commands
 
 - `.shop` shows your tokens; `.shop summon`; `.shop guildname <name>`
-- `.shop add <count> [player]` (GM), `.shop reload` (admin)
+- `.shop add <count> [player]`, `.shop remove <count> [player]` (GM), `.shop reload` (admin)
 
 ## Installing
 
