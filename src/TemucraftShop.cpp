@@ -8,7 +8,7 @@
  *   npc_temucraft_shop_curator     gossip: category lists, buy tokens for gold, token balance
  *   item_temucraft_shop_service    rename, appearance change, race change, pet rename, guild rename tokens
  *   form glyphs                    shapeshift forms show another model while the glyph is known
- *   .shop                          balance; .shop summon; .shop add <count> [player] (GM); .shop guildname <name>
+ *   .temucraft shop                          balance; .temucraft shop summon; .temucraft shop add <count> [player] (GM); .temucraft shop guildname <name>
  */
 
 #include "AccountMgr.h"
@@ -433,7 +433,7 @@ namespace TemucraftShop
                     break;
                 }
                 case SERVICE_GUILD_RENAME:
-                    handler.SendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 20, "|cff66ccffTemucraft:|r as guild master, type .shop guildname <new name> to use this token."));
+                    handler.SendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 20, "|cff66ccffTemucraft:|r as guild master, type .temucraft shop guildname <new name> to use this token."));
                     return true;
                 case SERVICE_BANK_SLOTS:
                     if (player->GetBankBagSlotCount() >= MAX_BANK_BAG_SLOTS)
@@ -602,14 +602,14 @@ namespace TemucraftShop
         {
             static ChatCommandTable shop =
             {
-                { "",          HandleBalance,   SEC_PLAYER,     Console::No },
-                { "summon",    HandleSummon,    SEC_PLAYER,     Console::No },
-                { "guildname", HandleGuildName, SEC_PLAYER,     Console::No },
+                { "",          HandleBalance,   101250,     Console::No },
+                { "summon",    HandleSummon,    101251,     Console::No },
+                { "guildname", HandleGuildName, 101252,     Console::No },
                 { "add",       HandleAdd,       101201 /* SEC_GAMEMASTER -> RBAC */, Console::Yes },
                 { "remove",    HandleRemove,    101201 /* SEC_GAMEMASTER -> RBAC */, Console::Yes },
                 { "reload",    HandleReload,    101202 /* SEC_ADMINISTRATOR -> RBAC */, Console::Yes },
             };
-            static ChatCommandTable root = { { "shop", shop } };
+            static ChatCommandTable root = { { "temucraft shop", shop } };
             return root;
         }
 
@@ -618,7 +618,7 @@ namespace TemucraftShop
             Player* player = handler->GetPlayer();
             uint32 n = Balance(player);
             handler->PSendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 21, "|cff66ccffTemucraft:|r you have {} token{}. Visit a Temucraft Curator by any capital's innkeeper{}."),
-                n, n == 1 ? "" : "s", cfg.summon ? ", or type .shop summon" : "");
+                n, n == 1 ? "" : "s", cfg.summon ? ", or type .temucraft shop summon" : "");
             return true;
         }
 

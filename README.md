@@ -10,12 +10,12 @@ All amounts are in `conf/mod-temucraft-shop.conf.dist`; 0 turns a source off.
 - **Bosses:** the first kill of each dungeon boss (2), heroic boss (3) and raid boss (10), per character and difficulty. Every group member in the instance gets them.
 - **Achievements:** 1 per 5 achievement points.
 - **Gold:** the curator sells tokens for 10 gold each (`GoldPerToken`, 0 = off).
-- **Game masters:** `.shop add <count> [player]` and `.shop remove <count> [player]`.
+- **Game masters:** `.temucraft shop add <count> [player]` and `.temucraft shop remove <count> [player]`.
 - **Selling back:** with `GoldPerTokenSold` above 0 the curator also buys tokens back for gold (off by default).
 
 ## The curator
 
-One stands beside the innkeeper of every capital (Stormwind, Orgrimmar, Ironforge, Undercity, Darnassus, Thunder Bluff, Exodar, Silvermoon, Dalaran, Shattrath). `.shop summon` calls one for 3 minutes, every 10 minutes. Its gossip opens a vendor window per category; prices are in tokens:
+One stands beside the innkeeper of every capital (Stormwind, Orgrimmar, Ironforge, Undercity, Darnassus, Thunder Bluff, Exodar, Silvermoon, Dalaran, Shattrath). `.temucraft shop summon` calls one for 3 minutes, every 10 minutes. Its gossip opens a vendor window per category; prices are in tokens:
 
 | Category | Items |
 |---|---|
@@ -46,7 +46,7 @@ the usual level and previous rank); otherwise it says so and can be sold back fo
 
 ## Service tokens
 
-Rename, appearance change, race change (to the other faction it becomes a faction change), pet rename (call the pet first) and guild rename (`.shop guildname <name>`, guild master only).
+Rename, appearance change, race change (to the other faction it becomes a faction change), pet rename (call the pet first) and guild rename (`.temucraft shop guildname <name>`, guild master only).
 
 ## Form glyphs
 
@@ -54,8 +54,8 @@ While a glyph is known, druid forms and Ghost Wolf show another model (Frostsabe
 
 ## Commands
 
-- `.shop` shows your tokens; `.shop summon`; `.shop guildname <name>`
-- `.shop add <count> [player]`, `.shop remove <count> [player]` (GM), `.shop reload` (admin)
+- `.temucraft shop` shows your tokens; `.temucraft shop summon`; `.temucraft shop guildname <name>`
+- `.temucraft shop add <count> [player]`, `.temucraft shop remove <count> [player]` (GM), `.temucraft shop reload` (admin)
 
 ## Installing
 

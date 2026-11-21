@@ -20,7 +20,7 @@ INSERT INTO `module_string` (`module`, `id`, `string`) VALUES
 ('mod-temucraft-shop', 17, '|cff66ccffTemucraft:|r log out: you can change race on the character screen.'),
 ('mod-temucraft-shop', 18, '|cff66ccffTemucraft:|r call the hunter pet you want to rename first.'),
 ('mod-temucraft-shop', 19, '|cff66ccffTemucraft:|r right-click your pet''s portrait and choose Rename.'),
-('mod-temucraft-shop', 20, '|cff66ccffTemucraft:|r as guild master, type .shop guildname <new name> to use this token.'),
+('mod-temucraft-shop', 20, '|cff66ccffTemucraft:|r as guild master, type .temucraft shop guildname <new name> to use this token.'),
 ('mod-temucraft-shop', 21, '|cff66ccffTemucraft:|r you have {} token{}. Visit a Temucraft Curator by any capital''s innkeeper{}.'),
 ('mod-temucraft-shop', 22, 'Summoning the curator is turned off.'),
 ('mod-temucraft-shop', 23, 'Not now.'),

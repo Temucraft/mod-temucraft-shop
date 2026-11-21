@@ -73,7 +73,7 @@ Temucraft.Shop.RestoreCost = 150
 #    Temucraft.Shop.Summon.Enable
 #    Temucraft.Shop.Summon.Cooldown
 #    Temucraft.Shop.Summon.Duration
-#        Description: .shop summon calls a curator for Duration seconds, once every Cooldown seconds.
+#        Description: .temucraft shop summon calls a curator for Duration seconds, once every Cooldown seconds.
 #        Default:     1, 600, 180
 
 Temucraft.Shop.Summon.Enable = 1
