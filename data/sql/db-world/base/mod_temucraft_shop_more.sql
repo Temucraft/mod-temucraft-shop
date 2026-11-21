@@ -1,14 +1,16 @@
--- mod-temucraft-shop: the Toys list and stock mounts and companions added to the curator (stock 3.3.5 items, no
+-- mod-temucraft-shop: the Toys and Auras lists (the Auras goods come from mod-temucraft-auras) and stock mounts and companions added to the curator (stock 3.3.5 items, no
 -- client change). Prices are the existing ItemExtendedCost rows: 3200 = 40, 3201 = 50, 3202 = 75, 3203 = 80,
 -- 3205 = 100, 3208 = 150, 3209 = 180, 3213 = 2000 tokens. Stock items other vendors sell keep their gold price too.
 SET @VENDOR := 608001;
 
-DELETE FROM `creature_template_model` WHERE `CreatureID` = @VENDOR+8;
-DELETE FROM `creature_template` WHERE `entry` = @VENDOR+8;
+DELETE FROM `creature_template_model` WHERE `CreatureID` IN (@VENDOR+8, @VENDOR+9);
+DELETE FROM `creature_template` WHERE `entry` IN (@VENDOR+8, @VENDOR+9);
 INSERT INTO `creature_template` (`entry`, `name`, `subname`, `IconName`, `minlevel`, `maxlevel`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `unit_class`, `unit_flags`, `type`, `type_flags`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
-(@VENDOR+8, 'Temucraft Curator', 'Toys', 'Buy', 80, 80, 35, 128, 1, 1.14286, 1, 2, 7, 0, 130, '', 0);
+(@VENDOR+8, 'Temucraft Curator', 'Toys', 'Buy', 80, 80, 35, 128, 1, 1.14286, 1, 2, 7, 0, 130, '', 0),
+(@VENDOR+9, 'Temucraft Curator', 'Auras', 'Buy', 80, 80, 35, 128, 1, 1.14286, 1, 2, 7, 0, 130, '', 0);
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, `VerifiedBuild`)
-SELECT @VENDOR+8, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, 0 FROM `creature_template_model` WHERE `CreatureID` = @VENDOR;
+SELECT @VENDOR+8, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, 0 FROM `creature_template_model` WHERE `CreatureID` = @VENDOR
+UNION ALL SELECT @VENDOR+9, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, 0 FROM `creature_template_model` WHERE `CreatureID` = @VENDOR;
 
 DELETE FROM `npc_vendor` WHERE `entry` = @VENDOR+8 OR (`entry` IN (@VENDOR+4, @VENDOR+5) AND `slot` >= 100);
 INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES

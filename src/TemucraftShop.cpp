@@ -82,8 +82,8 @@ namespace TemucraftShop
     std::unordered_map<uint32, std::unordered_set<uint32>> sBosses;   // guid -> boss entries already rewarded
     std::unordered_map<uint32, uint32> sLastSummon;               // guid -> game time
 
-    constexpr uint8 CATEGORY_COUNT = 9;
-    char const* CategoryNames[CATEGORY_COUNT] = { "Miscellaneous", "Skins", "Gameplay", "Glyphs", "Mounts", "Companions", "Fashion", "Illusions", "Toys" };
+    constexpr uint8 CATEGORY_COUNT = 10;
+    char const* CategoryNames[CATEGORY_COUNT] = { "Miscellaneous", "Skins", "Gameplay", "Glyphs", "Mounts", "Companions", "Fashion", "Illusions", "Toys", "Auras" };
 
     void LoadConfig()
     {

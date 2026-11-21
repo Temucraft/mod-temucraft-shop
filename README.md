@@ -28,6 +28,7 @@ One stands beside the innkeeper of every capital (Stormwind, Orgrimmar, Ironforg
 | Fashion | 51 |
 | Illusions | 24 |
 | Toys | 25 |
+| Auras | from mod-temucraft-auras |
 
 ## Bringing back a deleted character
 
