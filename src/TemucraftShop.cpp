@@ -586,6 +586,9 @@ namespace TemucraftShop
                 return true;
             }
             uint32 now = uint32(GameTime::GetGameTime().count());
+            // drop cooldowns that ran out, so the map stays small
+            for (auto it = sLastSummon.begin(); it != sLastSummon.end();)
+                it = now >= it->second + cfg.summonCooldown ? sLastSummon.erase(it) : std::next(it);
             uint32& last = sLastSummon[player->GetGUID().GetCounter()];
             if (last && now < last + cfg.summonCooldown && !handler->GetSession()->GetSecurity())
             {
