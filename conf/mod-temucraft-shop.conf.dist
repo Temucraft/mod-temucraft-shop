@@ -62,6 +62,14 @@ Temucraft.Shop.GoldPerToken = 10
 Temucraft.Shop.GoldPerTokenSold = 0
 
 #
+#    Temucraft.Shop.RestoreCost
+#        Description: Tokens the curator asks to bring back a deleted character of the same account (0 = off).
+#                     Needs CharDelete.Method = 1 in worldserver.conf, which keeps deleted characters.
+#        Default:     150
+
+Temucraft.Shop.RestoreCost = 150
+
+#
 #    Temucraft.Shop.Summon.Enable
 #    Temucraft.Shop.Summon.Cooldown
 #    Temucraft.Shop.Summon.Duration

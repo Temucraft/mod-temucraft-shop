@@ -29,6 +29,13 @@ One stands beside the innkeeper of every capital (Stormwind, Orgrimmar, Ironforg
 | Illusions | 24 |
 | Toys | 25 |
 
+## Bringing back a deleted character
+
+The curator can bring back a character the same account deleted, for 150 tokens (`RestoreCost`, 0 = off). It lists
+the 15 most recent; if the name was taken meanwhile, the character asks for a new name at login. Needs
+`CharDelete.Method = 1` in worldserver.conf (deleted characters are kept, not erased). The account must have a free
+character place.
+
 ## Saddlemaster's Handbooks
 
 Every riding trainer also sells Saddlemaster's Handbooks (Journeyman, Expert, Artisan, Cold Weather) for a quarter of

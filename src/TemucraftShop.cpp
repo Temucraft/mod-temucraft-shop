@@ -11,6 +11,8 @@
  *   .shop                          balance; .shop summon; .shop add <count> [player] (GM); .shop guildname <name>
  */
 
+#include "AccountMgr.h"
+#include "CharacterCache.h"
 #include "Chat.h"
 #include "TemucraftModuleText.h"
 #include "ChatCommand.h"
@@ -39,6 +41,7 @@
 #include "TemporarySummon.h"
 #include "UnitScript.h"
 #include "WorldScript.h"
+#include "World.h"
 #include "WorldSession.h"
 #include <unordered_map>
 #include <unordered_set>
@@ -64,6 +67,7 @@ namespace TemucraftShop
         uint32 achievementPointsPerToken = 5;
         uint32 goldPerToken = 10;
         uint32 goldPerTokenSold = 0;   // gold a player gets for one token sold back (0 = selling is off)
+        uint32 restoreCost = 150;      // tokens to bring back a deleted character (0 = off)
         bool summon = true;
         uint32 summonCooldown = 600;
         uint32 summonDuration = 180;
@@ -93,6 +97,7 @@ namespace TemucraftShop
         cfg.achievementPointsPerToken = sConfigMgr->GetOption<uint32>("Temucraft.Shop.Tokens.AchievementPointsPerToken", 5);
         cfg.goldPerToken = sConfigMgr->GetOption<uint32>("Temucraft.Shop.GoldPerToken", 10);
         cfg.goldPerTokenSold = sConfigMgr->GetOption<uint32>("Temucraft.Shop.GoldPerTokenSold", 0);
+        cfg.restoreCost = sConfigMgr->GetOption<uint32>("Temucraft.Shop.RestoreCost", 150);
         cfg.summon = sConfigMgr->GetOption<bool>("Temucraft.Shop.Summon.Enable", true);
         cfg.summonCooldown = sConfigMgr->GetOption<uint32>("Temucraft.Shop.Summon.Cooldown", 600);
         cfg.summonDuration = sConfigMgr->GetOption<uint32>("Temucraft.Shop.Summon.Duration", 180);
@@ -177,7 +182,72 @@ namespace TemucraftShop
         ACTION_BALANCE = 202,
         ACTION_SELL_1 = 203,
         ACTION_SELL_10 = 204,
+        ACTION_RESTORE_LIST = 205,
+        ACTION_RESTORE = 300,      // + index in the list
     };
+
+    // deleted characters of this account the curator can bring back (needs CharDelete.Method = 1, which keeps them)
+    std::unordered_map<uint32, std::vector<uint32>> sRestoreList;   // account -> guids shown in the last list
+
+    uint32 DeletedCount(Player* player)
+    {
+        QueryResult r = CharacterDatabase.Query("SELECT COUNT(*) FROM characters WHERE deleteInfos_Account = {} AND deleteDate IS NOT NULL", player->GetSession()->GetAccountId());
+        return r ? uint32(r->Fetch()[0].Get<uint64>()) : 0;
+    }
+
+    void ShowRestoreList(Player* player, Creature* creature)
+    {
+        ClearGossipMenuFor(player);
+        std::vector<uint32>& guids = sRestoreList[player->GetSession()->GetAccountId()];
+        guids.clear();
+        if (QueryResult r = CharacterDatabase.Query("SELECT guid, deleteInfos_Name, level FROM characters WHERE deleteInfos_Account = {} AND deleteDate IS NOT NULL ORDER BY deleteDate DESC LIMIT 15",
+                player->GetSession()->GetAccountId()))
+            do
+            {
+                Field* f = r->Fetch();
+                guids.push_back(f[0].Get<uint32>());
+                std::string text = Acore::StringFormat(TemucraftModuleText("mod-temucraft-shop", player, 44, "Bring back {} (level {})"), f[1].Get<std::string>(), f[2].Get<uint8>());
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, text, GOSSIP_SENDER_MAIN, ACTION_RESTORE + uint32(guids.size() - 1),
+                    Acore::StringFormat(TemucraftModuleText("mod-temucraft-shop", player, 45, "Bring back {} for {} tokens?"), f[1].Get<std::string>(), cfg.restoreCost), 0, false);
+            } while (r->NextRow());
+        AddGossipItemFor(player, GOSSIP_ICON_CHAT, TemucraftModuleText("mod-temucraft-shop", player, 46, "Back"), GOSSIP_SENDER_MAIN, ACTION_BALANCE + 1000);
+        SendGossipMenuFor(player, CURATOR_TEXT, creature->GetGUID());
+    }
+
+    void Restore(Player* player, uint32 index)
+    {
+        ChatHandler handler(player->GetSession());
+        uint32 account = player->GetSession()->GetAccountId();
+        std::vector<uint32> const& guids = sRestoreList[account];
+        if (index >= guids.size() || !cfg.restoreCost)
+            return;
+        uint32 guid = guids[index];
+        QueryResult r = CharacterDatabase.Query("SELECT deleteInfos_Name, race, class, gender, level FROM characters WHERE guid = {} AND deleteInfos_Account = {} AND deleteDate IS NOT NULL", guid, account);
+        if (!r)
+            return;
+        Field* f = r->Fetch();
+        std::string name = f[0].Get<std::string>();
+        if (AccountMgr::GetCharactersCount(account) >= sWorld->getIntConfig(CONFIG_CHARACTERS_PER_REALM))
+        {
+            handler.SendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 47, "|cff66ccffTemucraft:|r this account has no free character place on this realm."));
+            return;
+        }
+        if (Balance(player) < cfg.restoreCost)
+        {
+            handler.PSendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 48, "|cff66ccffTemucraft:|r that costs {} tokens."), cfg.restoreCost);
+            return;
+        }
+        bool rename = ObjectMgr::CheckPlayerName(name) != CHAR_NAME_SUCCESS || sCharacterCache->GetCharacterGuidByName(name);
+        player->DestroyItemCount(cfg.token, cfg.restoreCost, true);
+        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+        trans->Append("UPDATE characters SET name = '{}', account = {}, deleteDate = NULL, deleteInfos_Name = NULL, deleteInfos_Account = NULL{} WHERE guid = {} AND deleteDate IS NOT NULL",
+            [&] { std::string n = name; CharacterDatabase.EscapeString(n); return n; }(), account, rename ? ", at_login = at_login | 1" : "", guid);
+        player->SaveInventoryAndGoldToDB(trans);
+        CharacterDatabase.CommitTransaction(trans);
+        sCharacterCache->AddCharacterCacheEntry(ObjectGuid(HighGuid::Player, guid), account, name, f[3].Get<uint8>(), f[1].Get<uint8>(), f[2].Get<uint8>(), f[4].Get<uint8>());
+        handler.PSendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 49, "|cff66ccffTemucraft:|r {} is back on your character list{}."), name,
+            rename ? TemucraftModuleText("mod-temucraft-shop", handler, 50, " (the name was taken: pick a new one when you log in)") : "");
+    }
 
     void ShowMenu(Player* player, Creature* creature)
     {
@@ -198,6 +268,8 @@ namespace TemucraftShop
             if (have >= 10)
                 AddGossipItemFor(player, GOSSIP_ICON_MONEY_BAG, TemucraftModuleText("mod-temucraft-shop", player, 35, "Sell 10 tokens for gold."), GOSSIP_SENDER_MAIN, ACTION_SELL_10, TemucraftModuleText("mod-temucraft-shop", player, 36, "Sell 10 Temucraft Tokens for gold?"), 0, false);
         }
+        if (cfg.restoreCost && DeletedCount(player))
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, Acore::StringFormat(TemucraftModuleText("mod-temucraft-shop", player, 43, "Bring back a deleted character ({} tokens)"), cfg.restoreCost), GOSSIP_SENDER_MAIN, ACTION_RESTORE_LIST);
         AddGossipItemFor(player, GOSSIP_ICON_CHAT, TemucraftModuleText("mod-temucraft-shop", player, 7, "How do I earn tokens?"), GOSSIP_SENDER_MAIN, ACTION_BALANCE);
         SendGossipMenuFor(player, CURATOR_TEXT, creature->GetGUID());
     }
@@ -221,6 +293,18 @@ namespace TemucraftShop
             {
                 CloseGossipMenuFor(player);
                 player->GetSession()->SendListInventory(creature->GetGUID(), VENDOR_FIRST + (action - ACTION_CATEGORY));
+                return true;
+            }
+
+            if (action == ACTION_RESTORE_LIST)
+            {
+                ShowRestoreList(player, creature);
+                return true;
+            }
+            if (action >= ACTION_RESTORE && action < ACTION_RESTORE + 15)
+            {
+                Restore(player, action - ACTION_RESTORE);
+                ShowMenu(player, creature);
                 return true;
             }
 

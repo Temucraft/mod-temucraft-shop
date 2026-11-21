@@ -42,4 +42,12 @@ INSERT INTO `module_string` (`module`, `id`, `string`) VALUES
 ('mod-temucraft-shop', 39, '|cff66ccffTemucraft:|r you already know this.'),
 ('mod-temucraft-shop', 40, '|cff66ccffTemucraft:|r you need level {} and the riding rank before this one.'),
 ('mod-temucraft-shop', 41, '|cff66ccffTemucraft:|r another character of your account must know this first. Sell the book back and learn it from the trainer.'),
-('mod-temucraft-shop', 42, '|cff66ccffTemucraft:|r learned.');
+('mod-temucraft-shop', 42, '|cff66ccffTemucraft:|r learned.'),
+('mod-temucraft-shop', 43, 'Bring back a deleted character ({} tokens)'),
+('mod-temucraft-shop', 44, 'Bring back {} (level {})'),
+('mod-temucraft-shop', 45, 'Bring back {} for {} tokens?'),
+('mod-temucraft-shop', 46, 'Back'),
+('mod-temucraft-shop', 47, '|cff66ccffTemucraft:|r this account has no free character place on this realm.'),
+('mod-temucraft-shop', 48, '|cff66ccffTemucraft:|r that costs {} tokens.'),
+('mod-temucraft-shop', 49, '|cff66ccffTemucraft:|r {} is back on your character list{}.'),
+('mod-temucraft-shop', 50, ' (the name was taken: pick a new one when you log in)');
