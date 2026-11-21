@@ -50,4 +50,9 @@ INSERT INTO `module_string` (`module`, `id`, `string`) VALUES
 ('mod-temucraft-shop', 47, '|cff66ccffTemucraft:|r this account has no free character place on this realm.'),
 ('mod-temucraft-shop', 48, '|cff66ccffTemucraft:|r that costs {} tokens.'),
 ('mod-temucraft-shop', 49, '|cff66ccffTemucraft:|r {} is back on your character list{}.'),
-('mod-temucraft-shop', 50, ' (the name was taken: pick a new one when you log in)');
+('mod-temucraft-shop', 50, ' (the name was taken: pick a new one when you log in)'),
+('mod-temucraft-shop', 51, '|cff66ccffTemucraft:|r you already have every bank bag slot.'),
+('mod-temucraft-shop', 52, '|cff66ccffTemucraft:|r every bank bag slot is open.'),
+('mod-temucraft-shop', 53, '|cff66ccffTemucraft:|r only a guild master can use this.'),
+('mod-temucraft-shop', 54, '|cff66ccffTemucraft:|r your guild has every bank tab already (or you carry too much gold to take the tab price).'),
+('mod-temucraft-shop', 55, '|cff66ccffTemucraft:|r your guild has a new bank tab.');

@@ -82,8 +82,8 @@ namespace TemucraftShop
     std::unordered_map<uint32, std::unordered_set<uint32>> sBosses;   // guid -> boss entries already rewarded
     std::unordered_map<uint32, uint32> sLastSummon;               // guid -> game time
 
-    constexpr uint8 CATEGORY_COUNT = 10;
-    char const* CategoryNames[CATEGORY_COUNT] = { "Miscellaneous", "Skins", "Gameplay", "Glyphs", "Mounts", "Companions", "Fashion", "Illusions", "Toys", "Auras" };
+    constexpr uint8 CATEGORY_COUNT = 11;
+    char const* CategoryNames[CATEGORY_COUNT] = { "Miscellaneous", "Skins", "Gameplay", "Glyphs", "Mounts", "Companions", "Fashion", "Illusions", "Toys", "Auras", "Helpers" };
 
     void LoadConfig()
     {
@@ -356,7 +356,32 @@ namespace TemucraftShop
         SERVICE_RACE = 3,
         SERVICE_PET_RENAME = 4,
         SERVICE_GUILD_RENAME = 5,
+        SERVICE_BANK_SLOTS = 6,     // Banker's Writ: every bank bag slot
+        SERVICE_GUILD_TAB = 7,      // Guild Vault Charter: the guild's next bank tab, no gold
     };
+
+    constexpr uint8 MAX_BANK_BAG_SLOTS = 7;
+
+    // buys the guild's next bank tab for the guild master without costing gold: the tab's price is handed over first
+    // and the stock purchase takes it again (it only goes through for the right tab, so every tab is tried)
+    bool BuyFreeGuildTab(Player* player, Guild* guild)
+    {
+        static ServerConfigs const COSTS[GUILD_BANK_MAX_TABS] = { CONFIG_GUILD_BANK_TAB_COST_0, CONFIG_GUILD_BANK_TAB_COST_1, CONFIG_GUILD_BANK_TAB_COST_2,
+                                                           CONFIG_GUILD_BANK_TAB_COST_3, CONFIG_GUILD_BANK_TAB_COST_4, CONFIG_GUILD_BANK_TAB_COST_5 };
+        for (uint8 tab = 0; tab < GUILD_BANK_MAX_TABS; ++tab)
+        {
+            uint32 cost = sWorld->getIntConfig(COSTS[tab]);
+            if (!cost || uint64(player->GetMoney()) + cost > MAX_MONEY_AMOUNT)
+                continue;
+            uint32 before = player->GetMoney();
+            player->ModifyMoney(int32(cost));
+            guild->HandleBuyBankTab(player->GetSession(), tab);
+            if (player->GetMoney() == before)
+                return true;                        // bought: the money went back out
+            player->ModifyMoney(-int32(player->GetMoney() - before));
+        }
+        return false;
+    }
 
     class item_temucraft_shop_service : public ItemScript
     {
@@ -410,6 +435,31 @@ namespace TemucraftShop
                 case SERVICE_GUILD_RENAME:
                     handler.SendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 20, "|cff66ccffTemucraft:|r as guild master, type .shop guildname <new name> to use this token."));
                     return true;
+                case SERVICE_BANK_SLOTS:
+                    if (player->GetBankBagSlotCount() >= MAX_BANK_BAG_SLOTS)
+                    {
+                        handler.SendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 51, "|cff66ccffTemucraft:|r you already have every bank bag slot."));
+                        return true;
+                    }
+                    player->SetBankBagSlotCount(MAX_BANK_BAG_SLOTS);
+                    handler.SendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 52, "|cff66ccffTemucraft:|r every bank bag slot is open."));
+                    break;
+                case SERVICE_GUILD_TAB:
+                {
+                    Guild* guild = player->GetGuild();
+                    if (!guild || guild->GetLeaderGUID() != player->GetGUID())
+                    {
+                        handler.SendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 53, "|cff66ccffTemucraft:|r only a guild master can use this."));
+                        return true;
+                    }
+                    if (!BuyFreeGuildTab(player, guild))
+                    {
+                        handler.SendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 54, "|cff66ccffTemucraft:|r your guild has every bank tab already (or you carry too much gold to take the tab price)."));
+                        return true;
+                    }
+                    handler.SendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 55, "|cff66ccffTemucraft:|r your guild has a new bank tab."));
+                    break;
+                }
                 default:
                     return false;
             }

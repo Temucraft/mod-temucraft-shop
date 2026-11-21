@@ -29,6 +29,7 @@ One stands beside the innkeeper of every capital (Stormwind, Orgrimmar, Ironforg
 | Illusions | 24 |
 | Toys | 25 |
 | Auras | from mod-temucraft-auras |
+| Helpers | Courier's Bell, Folding Mirror, Almanac, Lantern (mod-temucraft-courier), Banker's Writ, Guild Vault Charter |
 
 ## Bringing back a deleted character
 

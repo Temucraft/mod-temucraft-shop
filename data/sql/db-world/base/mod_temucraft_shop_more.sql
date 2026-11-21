@@ -1,16 +1,18 @@
--- mod-temucraft-shop: the Toys and Auras lists (the Auras goods come from mod-temucraft-auras) and stock mounts and companions added to the curator (stock 3.3.5 items, no
+-- mod-temucraft-shop: the Toys, Auras and Helpers lists (the Auras goods come from mod-temucraft-auras, the helper items from mod-temucraft-courier) and stock mounts and companions added to the curator (stock 3.3.5 items, no
 -- client change). Prices are the existing ItemExtendedCost rows: 3200 = 40, 3201 = 50, 3202 = 75, 3203 = 80,
 -- 3205 = 100, 3208 = 150, 3209 = 180, 3213 = 2000 tokens. Stock items other vendors sell keep their gold price too.
 SET @VENDOR := 608001;
 
-DELETE FROM `creature_template_model` WHERE `CreatureID` IN (@VENDOR+8, @VENDOR+9);
-DELETE FROM `creature_template` WHERE `entry` IN (@VENDOR+8, @VENDOR+9);
+DELETE FROM `creature_template_model` WHERE `CreatureID` IN (@VENDOR+8, @VENDOR+9, @VENDOR+10);
+DELETE FROM `creature_template` WHERE `entry` IN (@VENDOR+8, @VENDOR+9, @VENDOR+10);
 INSERT INTO `creature_template` (`entry`, `name`, `subname`, `IconName`, `minlevel`, `maxlevel`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `unit_class`, `unit_flags`, `type`, `type_flags`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
 (@VENDOR+8, 'Temucraft Curator', 'Toys', 'Buy', 80, 80, 35, 128, 1, 1.14286, 1, 2, 7, 0, 130, '', 0),
-(@VENDOR+9, 'Temucraft Curator', 'Auras', 'Buy', 80, 80, 35, 128, 1, 1.14286, 1, 2, 7, 0, 130, '', 0);
+(@VENDOR+9, 'Temucraft Curator', 'Auras', 'Buy', 80, 80, 35, 128, 1, 1.14286, 1, 2, 7, 0, 130, '', 0),
+(@VENDOR+10, 'Temucraft Curator', 'Helpers', 'Buy', 80, 80, 35, 128, 1, 1.14286, 1, 2, 7, 0, 130, '', 0);
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, `VerifiedBuild`)
 SELECT @VENDOR+8, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, 0 FROM `creature_template_model` WHERE `CreatureID` = @VENDOR
-UNION ALL SELECT @VENDOR+9, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, 0 FROM `creature_template_model` WHERE `CreatureID` = @VENDOR;
+UNION ALL SELECT @VENDOR+9, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, 0 FROM `creature_template_model` WHERE `CreatureID` = @VENDOR
+UNION ALL SELECT @VENDOR+10, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, 0 FROM `creature_template_model` WHERE `CreatureID` = @VENDOR;
 
 DELETE FROM `npc_vendor` WHERE `entry` = @VENDOR+8 OR (`entry` IN (@VENDOR+4, @VENDOR+5) AND `slot` >= 100);
 INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
@@ -77,3 +79,17 @@ UNION ALL SELECT `entry`, 1, @BOOK+1, 0, 0, 0, 0 FROM `tmp_temucraft_riding`
 UNION ALL SELECT `entry`, 2, @BOOK+2, 0, 0, 0, 0 FROM `tmp_temucraft_riding` WHERE `artisan` = 1
 UNION ALL SELECT `entry`, 3, @BOOK+3, 0, 0, 0, 0 FROM `tmp_temucraft_riding` WHERE `cold` = 1;
 DROP TEMPORARY TABLE `tmp_temucraft_riding`;
+
+-- Helpers list (vendor 608011): the courier's helper items (mod-temucraft-courier, 610140-610143), the Banker's Writ
+-- and the Guild Vault Charter (service tokens 6 and 7). The helper items are put on the list by mod-temucraft-courier's own SQL.
+SET @WRIT := 610144; SET @CHARTER := 610145;
+DELETE FROM `item_template` WHERE `entry` IN (@WRIT, @CHARTER);
+INSERT INTO `item_template` (`entry`, `class`, `subclass`, `SoundOverrideSubclass`, `name`, `displayid`, `Quality`, `Flags`, `BuyCount`, `BuyPrice`, `SellPrice`, `InventoryType`, `ItemLevel`, `maxcount`, `stackable`, `spellid_1`, `spelltrigger_1`, `spellcharges_1`, `spellcooldown_1`, `bonding`, `description`, `Material`, `ScriptName`) VALUES
+(@WRIT, 15, 0, -1, 'Banker''s Writ', 1093, 3, 0, 1, 0, 0, 0, 1, 0, 20, 18282, 0, 0, 1500, 1, 'Opens every bank bag slot you have not bought yet. Used up.', 7, 'item_temucraft_shop_service'),
+(@CHARTER, 15, 0, -1, 'Guild Vault Charter', 32845, 3, 0, 1, 0, 0, 0, 1, 0, 20, 18282, 0, 0, 1500, 1, 'Your guild gets its next guild bank tab without gold. Guild master only. Used up.', 7, 'item_temucraft_shop_service');
+DELETE FROM `mod_temucraft_shop_service` WHERE `ItemID` IN (@WRIT, @CHARTER);
+INSERT INTO `mod_temucraft_shop_service` (`ItemID`, `Service`, `Race`) VALUES (@WRIT, 6, 0), (@CHARTER, 7, 0);
+DELETE FROM `npc_vendor` WHERE `entry` = @VENDOR+10 AND `item` IN (@WRIT, @CHARTER);
+INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) VALUES
+(@VENDOR+10, 4, @WRIT, 0, 0, 3208, 0),
+(@VENDOR+10, 5, @CHARTER, 0, 0, 3211, 0);
