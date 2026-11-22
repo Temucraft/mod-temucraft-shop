@@ -85,11 +85,11 @@ SELECT d.`CreatureId`, MAX(s.`SpellId` = 34091), MAX(s.`SpellId` = 54197) FROM `
 JOIN `trainer_spell` s ON s.`TrainerId` = d.`TrainerId` WHERE s.`SpellId` IN (33391, 34090, 34091, 54197) GROUP BY d.`CreatureId`;
 UPDATE `creature_template` SET `npcflag` = `npcflag` | 128 WHERE `entry` IN (SELECT `entry` FROM `tmp_temucraft_riding`);
 DELETE FROM `npc_vendor` WHERE `item` BETWEEN @BOOK AND @BOOK+3;
-INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`)
-SELECT `entry`, 0, @BOOK+0, 0, 0, 0, 0 FROM `tmp_temucraft_riding`
-UNION ALL SELECT `entry`, 1, @BOOK+1, 0, 0, 0, 0 FROM `tmp_temucraft_riding`
-UNION ALL SELECT `entry`, 2, @BOOK+2, 0, 0, 0, 0 FROM `tmp_temucraft_riding` WHERE `artisan` = 1
-UNION ALL SELECT `entry`, 3, @BOOK+3, 0, 0, 0, 0 FROM `tmp_temucraft_riding` WHERE `cold` = 1;
+-- one INSERT each: MySQL can't open a temporary table twice in one query
+INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) SELECT `entry`, 0, @BOOK+0, 0, 0, 0, 0 FROM `tmp_temucraft_riding`;
+INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) SELECT `entry`, 1, @BOOK+1, 0, 0, 0, 0 FROM `tmp_temucraft_riding`;
+INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) SELECT `entry`, 2, @BOOK+2, 0, 0, 0, 0 FROM `tmp_temucraft_riding` WHERE `artisan` = 1;
+INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`, `VerifiedBuild`) SELECT `entry`, 3, @BOOK+3, 0, 0, 0, 0 FROM `tmp_temucraft_riding` WHERE `cold` = 1;
 DROP TEMPORARY TABLE `tmp_temucraft_riding`;
 
 -- Helpers list (vendor 608011): the courier's helper items (mod-temucraft-courier, 610140-610143), the Banker's Writ
