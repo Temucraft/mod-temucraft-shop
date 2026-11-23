@@ -11,6 +11,7 @@
  *   .temucraft shop                          balance; .temucraft shop summon; .temucraft shop add <count> [player] (GM); .temucraft shop guildname <name>
  */
 
+#include "TemucraftLocked.h"
 #include "AccountMgr.h"
 #include "CharacterCache.h"
 #include "Chat.h"
@@ -78,8 +79,8 @@ namespace TemucraftShop
 
     std::unordered_map<uint32, Service> sServices;
     std::unordered_map<uint32, std::vector<FormGlyph>> sGlyphs;   // form -> glyphs
-    std::unordered_map<uint32, uint32> sMaxLevel;                 // guid -> highest level already rewarded
-    std::unordered_map<uint32, std::unordered_set<uint32>> sBosses;   // guid -> boss entries already rewarded
+    Temucraft::LockedMap<uint32, uint32> sMaxLevel;                 // guid -> highest level already rewarded
+    Temucraft::LockedMap<uint32, std::unordered_set<uint32>> sBosses;   // guid -> boss entries already rewarded
     std::unordered_map<uint32, uint32> sLastSummon;               // guid -> game time
 
     constexpr uint8 CATEGORY_COUNT = 11;
