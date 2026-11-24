@@ -41,15 +41,7 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 (@VENDOR+0, 2, 1204444, 0, 0, 3203, 0),
 (@VENDOR+0, 3, 1204369, 0, 0, 3201, 0),
 (@VENDOR+0, 4, 1200879, 0, 0, 3208, 0),
-(@VENDOR+0, 5, 1200880, 0, 0, 3208, 0),
-(@VENDOR+0, 6, 1200881, 0, 0, 3208, 0),
-(@VENDOR+0, 7, 1200882, 0, 0, 3208, 0),
 (@VENDOR+0, 8, 1200883, 0, 0, 3208, 0),
-(@VENDOR+0, 9, 1200884, 0, 0, 3208, 0),
-(@VENDOR+0, 10, 1200885, 0, 0, 3208, 0),
-(@VENDOR+0, 11, 1200886, 0, 0, 3208, 0),
-(@VENDOR+0, 12, 1200888, 0, 0, 3208, 0),
-(@VENDOR+0, 13, 1200887, 0, 0, 3208, 0),
 (@VENDOR+1, 0, 1201284, 0, 0, 3203, 0),
 (@VENDOR+1, 1, 1201285, 0, 0, 3203, 0),
 (@VENDOR+1, 2, 1200590, 0, 0, 3203, 0),
@@ -283,7 +275,9 @@ INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `Exte
 -- shop goods sell for tokens only (except stock items that other vendors also sell)
 UPDATE `item_template` SET `BuyPrice` = 0 WHERE `entry` IN (1200008,1200013,1200014,1200035,1200036,1200037,1200038,1200039,1200040,1200041,1200042,1200043,1200044,1200045,1200046,1200047,1200048,1200049,1200050,1200051,1200166,1200167,1200496,1200497,1200498,1200499,1200500,1200501,1200503,1200504,1200510,1200525,1200531,1200557,1200558,1200559,1200560,1200562,1200569,1200570,1200571,1200572,1200577,1200578,1200590,1200591,1200683,1200684,1200685,1200686,1200687,1200688,1200691,1200692,1200693,1200694,1200695,1200712,1200713,1200714,1200715,1200716,1200717,1200794,1200805,1200806,1200807,1200808,1200809,1200810,1200812,1200813,1200814,1200874,1200878,1200879,1200880,1200881,1200882,1200883,1200884,1200885,1200886,1200887,1200888,1200922,1200925,1200926,1200964,1200965,1200971,1200976,1200978,1200979,1200981,1200984,1201002,1201015,1201059,1201061,1201062,1201126,1201229,1201284,1201285,1201292,1202833,1202834,1202835,1203557,1203562,1203563,1203564,1203565,1203566,1203567,1203581,1203582,1203583,1203584,1203585,1203586,1203587,1203588,1203589,1203591,1203592,1203593,1203594,1203595,1203596,1203610,1203611,1203612,1203613,1203614,1203615,1203616,1204282,1204285,1204301,1204302,1204305,1204307,1204308,1204309,1204320,1204369,1204417,1204443,1204444,1204647,1204648,1204649,1204650,1204651,1204653,1204654,1204656,1204662,1204664,1204675,1204676,1204685,1204686,1204687,1204689,1204690,1204691,1204693,1204714,1204715,1204717,1204718,1204719,1204720,1204721,1204738,1204739,1204740,1204741,1204742,1204743,1204745,1204746,1204747,1204749,1204750,1204753,1204765,1204767,1204992,1204993,1204994,1204998,1204999,1205000,1205001,1205002,1205004,1205005,1205008,1205102,1205103,1205104,1205176,1205177,1205337,1205338,1205339,1205340,1205341,1205342,1205343,1205344,1205345,1205346,1205347,1205348,1205349,1205350,1205351,1205354,1205355,1205356);
 
--- service tokens: 1 rename, 2 appearance change, 3 race change (Race = target race), 4 pet rename, 5 guild rename
+-- service tokens: 1 rename, 2 appearance change, 3 race change (same faction; the race is picked on the character screen),
+-- 4 pet rename, 5 guild rename, 8 faction change (6 and 7: mod_temucraft_shop_more.sql). One race change token and one faction change token: the old per race
+-- tokens named races this server doesn't have (High Elf), and the race is chosen on the character screen anyway.
 CREATE TABLE IF NOT EXISTS `mod_temucraft_shop_service` (`ItemID` int unsigned NOT NULL, `Service` tinyint unsigned NOT NULL, `Race` tinyint unsigned NOT NULL DEFAULT 0, PRIMARY KEY (`ItemID`)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 DELETE FROM `mod_temucraft_shop_service`;
 INSERT INTO `mod_temucraft_shop_service` (`ItemID`, `Service`, `Race`) VALUES
@@ -291,16 +285,9 @@ INSERT INTO `mod_temucraft_shop_service` (`ItemID`, `Service`, `Race`) VALUES
 (1204444, 2, 0),
 (1204369, 4, 0),
 (1204320, 5, 0),
-(1200879, 3, 1),
-(1200880, 3, 7),
-(1200881, 3, 3),
-(1200882, 3, 4),
-(1200883, 3, 2),
-(1200884, 3, 8),
-(1200885, 3, 6),
-(1200886, 3, 5),
-(1200888, 3, 9),
-(1200887, 3, 10);
+(1200879, 3, 0),
+(1200883, 8, 0);
+
 UPDATE `item_template` SET `ScriptName` = 'item_temucraft_shop_service', `spellid_1` = IF(`spellid_1` = 0, 1200003, `spellid_1`), `spelltrigger_1` = 0, `stackable` = 20 WHERE `entry` IN (1200496,1204444,1204369,1204320,1200879,1200880,1200881,1200882,1200883,1200884,1200885,1200886,1200888,1200887);
 
 -- form glyphs: while the glyph aura is known, the form shows this model (0 = the character's own model)
@@ -337,3 +324,8 @@ INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `p
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `Comment`) SELECT @GUID+7, @CURATOR, `map`, `zoneId`, `areaId`, 1, 1, `position_x`+2.5*COS(`orientation`-PI()/2), `position_y`+2.5*SIN(`orientation`-PI()/2), `position_z`, `orientation`, 300, 'Temucraft Curator, Silvermoon' FROM `creature` WHERE `id` = 16618 ORDER BY `guid` LIMIT 1;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `Comment`) SELECT @GUID+8, @CURATOR, `map`, `zoneId`, `areaId`, 1, 1, `position_x`+2.5*COS(`orientation`-PI()/2), `position_y`+2.5*SIN(`orientation`-PI()/2), `position_z`, `orientation`, 300, 'Temucraft Curator, Dalaran' FROM `creature` WHERE `id` = 28687 ORDER BY `guid` LIMIT 1;
 INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `Comment`) SELECT @GUID+9, @CURATOR, `map`, `zoneId`, `areaId`, 1, 1, `position_x`+2.5*COS(`orientation`-PI()/2), `position_y`+2.5*SIN(`orientation`-PI()/2), `position_z`, `orientation`, 300, 'Temucraft Curator, Shattrath' FROM `creature` WHERE `id` = 19046 ORDER BY `guid` LIMIT 1;
+
+-- the two race tokens, renamed; the old per race tokens are no longer sold
+UPDATE `item_template` SET `name` = 'Race Change Token', `description` = 'Change your race within your faction. You pick the new race on the character screen.' WHERE `entry` = 1200879;
+UPDATE `item_template` SET `name` = 'Faction Change Token', `description` = 'Change your faction and race. You pick the new race on the character screen.' WHERE `entry` = 1200883;
+DELETE FROM `mod_temucraft_shop_service` WHERE `ItemID` IN (1200880,1200881,1200882,1200884,1200885,1200886,1200887,1200888);

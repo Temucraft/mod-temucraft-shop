@@ -357,6 +357,7 @@ namespace TemucraftShop
         SERVICE_RACE = 3,
         SERVICE_PET_RENAME = 4,
         SERVICE_GUILD_RENAME = 5,
+        SERVICE_FACTION = 8,        // faction (and race) change
         SERVICE_BANK_SLOTS = 6,     // Banker's Writ: every bank bag slot
         SERVICE_GUILD_TAB = 7,      // Guild Vault Charter: the guild's next bank tab, no gold
     };
@@ -421,6 +422,10 @@ namespace TemucraftShop
                         ) : TemucraftModuleText("mod-temucraft-shop", handler, 17, "|cff66ccffTemucraft:|r log out: you can change race on the character screen."));
                     break;
                 }
+                case SERVICE_FACTION:
+                    player->SetAtLoginFlag(AT_LOGIN_CHANGE_FACTION);
+                    handler.SendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 16, "|cff66ccffTemucraft:|r log out: you can change race (and faction) on the character screen."));
+                    break;
                 case SERVICE_PET_RENAME:
                 {
                     Pet* pet = player->GetPet();

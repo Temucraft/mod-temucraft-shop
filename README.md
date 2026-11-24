@@ -46,7 +46,7 @@ the usual level and previous rank); otherwise it says so and can be sold back fo
 
 ## Service tokens
 
-Rename, appearance change, race change (to the other faction it becomes a faction change), pet rename (call the pet first) and guild rename (`.temucraft shop guildname <name>`, guild master only).
+Rename, appearance change, race change (one token, same faction), faction change (one token, new faction and race), pet rename (call the pet first) and guild rename (`.temucraft shop guildname <name>`, guild master only).
 
 ## Form glyphs
 
