@@ -161,7 +161,7 @@ namespace TemucraftShop
                 item->SaveToDB(trans);
                 draft.AddItem(item);
             }
-            draft.SendMailTo(trans, MailReceiver(player), MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_GM));
+            draft.SendMailTo(trans, MailReceiver(player), MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_DEFAULT));
             CharacterDatabase.CommitTransaction(trans);
         }
 
