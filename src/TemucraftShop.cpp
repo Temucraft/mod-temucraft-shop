@@ -44,6 +44,8 @@
 #include "WorldScript.h"
 #include "World.h"
 #include "WorldSession.h"
+#include "AsyncCallbackProcessor.h"
+#include "Transaction.h"
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -189,6 +191,21 @@ namespace TemucraftShop
 
     // deleted characters of this account the curator can bring back (needs CharDelete.Method = 1, which keeps them)
     std::unordered_map<uint32, std::vector<uint32>> sRestoreList;   // account -> guids shown in the last list
+    // Characters being brought back: the UPDATE goes through the async DB queue (the token save in the same
+    // transaction has only async prepared statements), and until it has run a sync query still sees the character as
+    // deleted. A guid stays here from the charge until the transaction is done, so a second click (or a rebuilt list)
+    // can't charge for it again. Gossip and the callbacks (WorldScript OnUpdate) both run on the world thread.
+    std::unordered_map<uint32, uint32> sRestoring;                   // character guid -> account
+    AsyncCallbackProcessor<TransactionCallback> sRestoreCallbacks;
+
+    uint32 RestoringFor(uint32 account)
+    {
+        uint32 n = 0;
+        for (auto const& [guid, acc] : sRestoring)
+            if (acc == account)
+                ++n;
+        return n;
+    }
 
     uint32 DeletedCount(Player* player)
     {
@@ -206,6 +223,8 @@ namespace TemucraftShop
             do
             {
                 Field* f = r->Fetch();
+                if (sRestoring.count(f[0].Get<uint32>()))   // already on its way back
+                    continue;
                 guids.push_back(f[0].Get<uint32>());
                 std::string text = Acore::StringFormat(TemucraftModuleText("mod-temucraft-shop", player, 44, "Bring back {} (level {})"), f[1].Get<std::string>(), f[2].Get<uint8>());
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, text, GOSSIP_SENDER_MAIN, ACTION_RESTORE + uint32(guids.size() - 1),
@@ -223,12 +242,14 @@ namespace TemucraftShop
         if (index >= guids.size() || !cfg.restoreCost)
             return;
         uint32 guid = guids[index];
+        if (sRestoring.count(guid))
+            return;
         QueryResult r = CharacterDatabase.Query("SELECT deleteInfos_Name, race, class, gender, level FROM characters WHERE guid = {} AND deleteInfos_Account = {} AND deleteDate IS NOT NULL", guid, account);
         if (!r)
             return;
         Field* f = r->Fetch();
         std::string name = f[0].Get<std::string>();
-        if (AccountMgr::GetCharactersCount(account) >= sWorld->getIntConfig(CONFIG_CHARACTERS_PER_REALM))
+        if (AccountMgr::GetCharactersCount(account) + RestoringFor(account) >= sWorld->getIntConfig(CONFIG_CHARACTERS_PER_REALM))
         {
             handler.SendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 47, "|cff66ccffTemucraft:|r this account has no free character place on this realm."));
             return;
@@ -239,12 +260,21 @@ namespace TemucraftShop
             return;
         }
         bool rename = ObjectMgr::CheckPlayerName(name) != CHAR_NAME_SUCCESS || sCharacterCache->GetCharacterGuidByName(name);
+        sRestoring[guid] = account;   // before the charge
         player->DestroyItemCount(cfg.token, cfg.restoreCost, true);
         CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
         trans->Append("UPDATE characters SET name = '{}', account = {}, deleteDate = NULL, deleteInfos_Name = NULL, deleteInfos_Account = NULL{} WHERE guid = {} AND deleteDate IS NOT NULL",
             [&] { std::string n = name; CharacterDatabase.EscapeString(n); return n; }(), account, rename ? ", at_login = at_login | 1" : "", guid);
         player->SaveInventoryAndGoldToDB(trans);
-        CharacterDatabase.CommitTransaction(trans);
+        sRestoreCallbacks.AddCallback(CharacterDatabase.AsyncCommitTransaction(trans)).AfterComplete([guid](bool success)
+        {
+            // on failure the tokens are gone in memory but the character is still deleted: keep it out of the list
+            // until a restart rather than charge again
+            if (success)
+                sRestoring.erase(guid);
+            else
+                LOG_ERROR("module", "mod-temucraft-shop: bringing back character {} failed in the database.", guid);
+        });
         sCharacterCache->AddCharacterCacheEntry(ObjectGuid(HighGuid::Player, guid), account, name, f[3].Get<uint8>(), f[1].Get<uint8>(), f[2].Get<uint8>(), f[4].Get<uint8>());
         handler.PSendSysMessage(TemucraftModuleText("mod-temucraft-shop", handler, 49, "|cff66ccffTemucraft:|r {} is back on your character list{}."), name,
             rename ? TemucraftModuleText("mod-temucraft-shop", handler, 50, " (the name was taken: pick a new one when you log in)") : "");
@@ -778,7 +808,10 @@ namespace TemucraftShop
     class TemucraftShopWorld : public WorldScript
     {
     public:
-        TemucraftShopWorld() : WorldScript("TemucraftShopWorld", { WORLDHOOK_ON_AFTER_CONFIG_LOAD, WORLDHOOK_ON_STARTUP }) { }
+        TemucraftShopWorld() : WorldScript("TemucraftShopWorld", { WORLDHOOK_ON_AFTER_CONFIG_LOAD, WORLDHOOK_ON_STARTUP, WORLDHOOK_ON_UPDATE }) { }
+
+        void OnUpdate(uint32 /*diff*/) override { sRestoreCallbacks.ProcessReadyCallbacks(); }
+
 
         void OnAfterConfigLoad(bool /*reload*/) override { LoadConfig(); }
         void OnStartup() override { LoadTables(); }
